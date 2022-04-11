@@ -5,7 +5,7 @@ public class PlayerMovement : MonoBehaviour {
 
     [Header("Variable")]
     [SerializeField] private float speed;
-    private Vector2 lastMovement;
+    private Vector2 lastMovement, movePosition;
     private bool attacking;
     private bool walking;
 
@@ -17,6 +17,10 @@ public class PlayerMovement : MonoBehaviour {
     {
         rb2d = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+
+        DontDestroyOnLoad(gameObject);
+
+        Debug.Log("Entré a una escena");
     }
     private void Update()
     {
@@ -37,16 +41,17 @@ public class PlayerMovement : MonoBehaviour {
     private void Move()
     {
         walking = false;
-        Vector2 movePosition;
 
-        float h = Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;
-        float v = Input.GetAxisRaw("Vertical") * speed * Time.deltaTime;
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
 
-        movePosition = new Vector2(h, v).normalized;
+        movePosition = new Vector2(h, v);
+
+        rb2d.velocity = movePosition.normalized * speed * Time.deltaTime;
 
         if (movePosition.x != 0 || movePosition.y != 0)
         {
-            rb2d.velocity = movePosition;
+            lastMovement = new Vector2(h, v);
             walking = true;
         }
         else
