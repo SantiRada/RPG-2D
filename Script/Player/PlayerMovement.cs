@@ -37,19 +37,40 @@ public class PlayerMovement : MonoBehaviour {
     private void Move()
     {
         walking = false;
+        Vector2 movePosition;
 
-        if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.5f)
+        float h = Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;
+        float v = Input.GetAxisRaw("Vertical") * speed * Time.deltaTime;
+
+        movePosition = new Vector2(h, v).normalized;
+
+        if (movePosition.x != 0 || movePosition.y != 0)
         {
-            transform.Translate(new Vector3(Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime, 0, 0));
+            rb2d.velocity = movePosition;
+            walking = true;
+        }
+        else
+            rb2d.velocity = Vector2.zero;
+
+
+
+        /*if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.5f)
+        {
+            //transform.Translate(new Vector3(Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime, 0, 0));
+
+            rb2d.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime, rb2d.velocity.y);
             walking = true;
             lastMovement = new Vector2(Input.GetAxisRaw("Horizontal"), 0);
         }
         if (Mathf.Abs(Input.GetAxisRaw("Vertical")) > 0.5f)
         {
-            transform.Translate(new Vector3(0, Input.GetAxisRaw("Vertical") * speed * Time.deltaTime, 0));
+            //transform.Translate(new Vector3(0, Input.GetAxisRaw("Vertical") * speed * Time.deltaTime, 0));
+            rb2d.velocity = new Vector2(rb2d.velocity.x, Input.GetAxisRaw("Vertical") * speed * Time.deltaTime);
             walking = true;
             lastMovement = new Vector2(0, Input.GetAxisRaw("Vertical"));
-        }
+        }*/
+        if (!walking)
+            rb2d.velocity = Vector2.zero;
     }
     private void Attack()
     {
