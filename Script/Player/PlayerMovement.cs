@@ -4,8 +4,14 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour {
 
     [Header("Variable")]
+    [HideInInspector] public string nextPlaceName;
     [SerializeField] private float speed;
-    private Vector2 lastMovement, movePosition;
+    [HideInInspector] public Vector2 lastMovement;
+    private Vector2 movePosition;
+
+    [Header("System Attack")]
+    [SerializeField] private float attackTime;
+    private float attackTimeCounter;
     private bool attacking;
     private bool walking;
 
@@ -13,14 +19,22 @@ public class PlayerMovement : MonoBehaviour {
     private Rigidbody2D rb2d;
     private Animator anim;
 
+    public static bool playerCreated;
+
     private void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 
-        DontDestroyOnLoad(gameObject);
+        if (!playerCreated)
+        {
+            playerCreated = true;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+            Destroy(gameObject);
 
-        Debug.Log("Entré a una escena");
+        attackTimeCounter = attackTime;
     }
     private void Update()
     {
@@ -51,39 +65,34 @@ public class PlayerMovement : MonoBehaviour {
 
         if (movePosition.x != 0 || movePosition.y != 0)
         {
-            lastMovement = new Vector2(h, v);
-            walking = true;
+            if (!attacking)
+            {
+                lastMovement = new Vector2(h, v);
+                walking = true;
+            }
         }
         else
             rb2d.velocity = Vector2.zero;
 
-
-
-        /*if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.5f)
-        {
-            //transform.Translate(new Vector3(Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime, 0, 0));
-
-            rb2d.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime, rb2d.velocity.y);
-            walking = true;
-            lastMovement = new Vector2(Input.GetAxisRaw("Horizontal"), 0);
-        }
-        if (Mathf.Abs(Input.GetAxisRaw("Vertical")) > 0.5f)
-        {
-            //transform.Translate(new Vector3(0, Input.GetAxisRaw("Vertical") * speed * Time.deltaTime, 0));
-            rb2d.velocity = new Vector2(rb2d.velocity.x, Input.GetAxisRaw("Vertical") * speed * Time.deltaTime);
-            walking = true;
-            lastMovement = new Vector2(0, Input.GetAxisRaw("Vertical"));
-        }*/
         if (!walking)
             rb2d.velocity = Vector2.zero;
     }
     private void Attack()
     {
-        attacking = false;
-
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButtonDown("Fire1") && !walking)
         {
+            attackTimeCounter = attackTime;
             attacking = true;
+        }
+
+        if (attacking)
+        {
+            attackTimeCounter -= Time.deltaTime;
+
+            if(attackTimeCounter <= 0)
+            {
+                attacking = false;
+            }
         }
     }
 }

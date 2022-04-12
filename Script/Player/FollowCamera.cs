@@ -14,8 +14,6 @@ public class FollowCamera : MonoBehaviour {
     private void Start()
     {
         target = FindObjectOfType<PlayerMovement>().transform;
-
-        DontDestroyOnLoad(gameObject);
     }
     private void Update()
     {
