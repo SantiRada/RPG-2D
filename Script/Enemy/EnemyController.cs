@@ -10,10 +10,11 @@ public class EnemyController : MonoBehaviour {
     private float timeBetweenStepsCounter;
 
     [SerializeField] private float timeToMakeStep;
-    private float timeToMakeStepCounter;
-    private Vector2 direction;
+    [HideInInspector] public float timeToMakeStepCounter;
+    [HideInInspector] public Vector2 direction;
 
-    private bool isMoving;
+    [HideInInspector] public bool attacking;
+    [HideInInspector] public bool isMoving;
 
     [Header("Limits for Player")]
     [SerializeField] private float limitX;
@@ -41,6 +42,8 @@ public class EnemyController : MonoBehaviour {
         VerificateDistance();
 
         #region Animator
+        anim.SetBool("InMove", isMoving);
+        anim.SetBool("Attacking", attacking);
         anim.SetFloat("Horizontal", direction.x);
         anim.SetFloat("Vertical", direction.y);
         #endregion
@@ -57,28 +60,50 @@ public class EnemyController : MonoBehaviour {
     }
     private void MoveEnemy()
     {
-        if (isMoving)
+        if (!attacking && FindObjectOfType<PauseMenu>().inPause == false)
         {
-            timeToMakeStepCounter -= Time.deltaTime;
-            rb2d.velocity = direction;
-
-            if (timeToMakeStepCounter < 0)
+            if (isMoving)
             {
-                isMoving = false;
-                timeBetweenStepsCounter = timeBetweenSteps;
-                rb2d.velocity = Vector2.zero;
+                timeToMakeStepCounter -= Time.deltaTime;
+                rb2d.velocity = direction;
+
+                if (timeToMakeStepCounter < 0)
+                {
+                    isMoving = false;
+                    timeBetweenStepsCounter = timeBetweenSteps;
+                    rb2d.velocity = Vector2.zero;
+                }
+            }
+            else
+            {
+                timeBetweenStepsCounter -= Time.deltaTime;
+                if (timeBetweenStepsCounter < 0)
+                {
+                    isMoving = true;
+                    timeToMakeStepCounter = timeToMakeStep;
+
+                    direction = new Vector2(Random.Range(-1, 1), Random.Range(-1, 1)) * speed;
+                }
             }
         }
-        else
+    }
+    public void Stop()
+    {
+        isMoving = false;
+        timeToMakeStepCounter = 0;
+        rb2d.velocity = Vector2.zero;
+    }
+    public void UpdateLevel()
+    {
+        if (GetComponent<CharacterStats>().currentLevel > 1)
         {
-            timeBetweenStepsCounter -= Time.deltaTime;
-            if(timeBetweenStepsCounter < 0)
-            {
-                isMoving = true;
-                timeToMakeStepCounter = timeToMakeStep;
+            speed = speed * 1.1f;
 
-                direction = new Vector2(Random.Range(-1, 1), Random.Range(-1, 1)) * speed;
-            }
+            HealthManager hm = GetComponent<HealthManager>();
+            hm.maxHealth = (int)(hm.maxHealth * 1.35f);
+            hm.currentHealth = hm.maxHealth;
+
+            GetComponent<DamagePlayer>().damage = (int)(GetComponent<DamagePlayer>().damage * 1.15f);
         }
     }
 }
